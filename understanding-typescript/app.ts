@@ -1,10 +1,14 @@
-function add(n1: number, n2: number) {
-  return n1 + n2;
+const person = {
+    name: 'Alex',
+    age: 30,
+    hobbies: ['Sports', 'Cooking', 'Music']
+};
+
+let favouriteActivities: string[];
+favouriteActivities = person.hobbies;
+
+person.hobbies.forEach(hobby => console.log(hobby.toUpperCase()));
+
+for (const hobby of person.hobbies) {
+    console.log(hobby.toLowerCase())
 }
-
-const number1: number = 5;
-const number2: number = 2.8;
-const printResult = true;
-
-const result = add(number1, number2);
-console.log(result);
