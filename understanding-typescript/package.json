@@ -1,0 +1,15 @@
+{
+  "name": "understanding-typescript",
+  "version": "1.0.0",
+  "description": "This repository will be where I develop my journey through this Udemy course",
+  "main": "app.js",
+  "scripts": {
+    "test": "testcommand",
+    "start": "lite-server"
+  },
+  "author": "Alex Baxter",
+  "license": "ISC",
+  "devDependencies": {
+    "lite-server": "^2.6.1"
+  }
+}
