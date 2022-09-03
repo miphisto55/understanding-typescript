@@ -1,14 +1,5 @@
-var userInput; // Maybe we don't know if the user will enter a number, or a string etc. Similar to the any type, but almost always a better choice than any
-// If we know that userInput will be a number or string for example, we should use the union type string | number
-var userName;
-userInput = 5;
-userInput = 'Alex';
-// userName = userInput;    // this is not allowed since the userName variable (string) is NOT the same type as userInput (unknown)
-// However we can introduce some logic to check the value of userInput to assign it to userName
-if (typeof userInput === 'string') {
-    userName = userInput; // allowed
-}
-function generateError(message, code) {
-    throw { message: message, errorCode: code };
-}
-generateError('An error occured with value', 500);
+"use strict";
+const button = document.querySelector('button');
+button === null || button === void 0 ? void 0 : button.addEventListener('click', () => {
+    console.log('Clicked!');
+});
