@@ -1,43 +1,14 @@
-function add(n1, n2) {
-    return n1 + n2;
+var userInput; // Maybe we don't know if the user will enter a number, or a string etc. Similar to the any type, but almost always a better choice than any
+// If we know that userInput will be a number or string for example, we should use the union type string | number
+var userName;
+userInput = 5;
+userInput = 'Alex';
+// userName = userInput;    // this is not allowed since the userName variable (string) is NOT the same type as userInput (unknown)
+// However we can introduce some logic to check the value of userInput to assign it to userName
+if (typeof userInput === 'string') {
+    userName = userInput; // allowed
 }
-;
-function add2(n1, n2) {
-    return n1 + n2;
+function generateError(message, code) {
+    throw { message: message, errorCode: code };
 }
-;
-function add3(n1, n2) {
-    return n1.toString() + n2.toString();
-}
-;
-function add4(n1, n2) {
-    return n1.toString() + n2.toString();
-}
-;
-function printResult(num) {
-    console.log('Result: ' + num);
-}
-;
-function printResult2(num) {
-    console.log('Result: ' + num);
-    return;
-}
-;
-var someValue; // this is a value datatype,  
-printResult(add(2, 3));
-// We can also declare pointers to functions by using the "any" type
-var combineValues;
-var combineValues2;
-// But its best to use the "Function" datatype for this purpose
-var combineValues3;
-combineValues = add;
-combineValues3 = add;
-console.log(combineValues(1, 3));
-console.log(combineValues3(1, 9));
-var log = console.log;
-log('Sup everyone');
-function addAndHandle(n1, n2, callback) {
-    var result = n1 + n2;
-    callback(result);
-}
-addAndHandle(10, 20, function () { });
+generateError('An error occured with value', 500);
