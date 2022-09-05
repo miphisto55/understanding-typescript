@@ -25,3 +25,4 @@ if (person.role === Roles.ADMIN) {
     console.log(Roles.MOD);
     console.log(Roles.READ_ONLY);
 }
+//# sourceMappingURL=objs-arrays-enums.js.map

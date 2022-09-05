@@ -1,10 +1,12 @@
 // Always set the following options:
 /*
-  - "target"
+  - "target" => What version of JS typescript will compile to
   - "rootDir" => Setting the src folder also forces the compiler to maintain the same folder structure as the src folder
-  - "outDir"
+  - "outDir" => What directory the compiled ts js files will end up.
   - "strict" = true
   - "exclude" => if needed (again, node_modules is excluded by default, but nice to explicitly define this)
+
+  - "sourceMaps" => turn on true if we want to be able to debug ts in chrome debugger. Creates .map files though
 */
 
 {
@@ -56,7 +58,7 @@
     // "declaration": true,                              /* Generate .d.ts files from TypeScript and JavaScript files in your project. */
     // "declarationMap": true,                           /* Create sourcemaps for d.ts files. */
     // "emitDeclarationOnly": true,                      /* Only output d.ts files and not JavaScript files. */
-    // "sourceMap": true,                                /* Create source map files for emitted JavaScript files. */ // Alows us to debug .ts files in the browser dev tools
+     "sourceMap": true,                                /* Create source map files for emitted JavaScript files. */ // Alows us to debug .ts files in the browser dev tools
     // "outFile": "./",                                  /* Specify a file that bundles all outputs into one JavaScript file. If 'declaration' is true, also designates a file that bundles all .d.ts output. */
      "outDir": "./dist",                                   /* Specify an output folder for all emitted files. */
     // "removeComments": true,                           /* Disable emitting comments. */

@@ -13,3 +13,4 @@ function generateError(message, code) {
     throw { message: message, errorCode: code }; // of course we could encapsulate this in a try catch still
 } // it actually returns the 'never' type, which may be a niche use-case
 generateError('An error occured!', 500);
+//# sourceMappingURL=unknown-never-types.js.map

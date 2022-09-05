@@ -14,3 +14,4 @@ const combinedAges = combine(3, 4, 'number');
 console.log(combinedAges);
 const combinedNames = combine('Alex', 'Karah', 'number');
 console.log(combinedNames);
+//# sourceMappingURL=union-types-aliases.js.map
