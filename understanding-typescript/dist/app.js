@@ -62,13 +62,46 @@ var TypeGuards;
     const v2 = new Truck();
     function useVehicle(vehicle) {
         vehicle.drive();
-        // Again can use the in keyword to check for properties... or
-        // use instanceof
+        // Again can use the 'in' keyword to check for properties, or use instanceof
+        // instanceof will NOT WORK on interfaces since interfaces compile to... well nothing on the javascript side.
         if (vehicle instanceof Truck) {
             vehicle.loadCargo();
         }
     }
     useVehicle(v1);
     useVehicle(v2);
+    function moveAnimal(animal) {
+        let speed;
+        switch (animal.type) {
+            case 'bird':
+                speed = animal.flyingSpeed;
+                break;
+            case 'horse':
+                speed = animal.runningSpeed;
+                break;
+        }
+        console.log("Moving with incredible speed at: " + speed + " m/s");
+    }
+    const bird1 = {
+        type: 'bird',
+        flyingSpeed: 4
+    };
+    const horse1 = {
+        type: 'horse',
+        runningSpeed: 8
+    };
+    moveAnimal(bird1);
+    moveAnimal(horse1);
+    // const paragraph = document.getElementById('message-output');
+    // Type casting
+    // const userInput = <HTMLInputElement>document.getElementById('user-input')!;
+    // Use this syntax if WE KNOW the element won't be null
+    const userInput = document.getElementById('user-input'); // Type casting way #2, which is cleaner imo and also wont conflict with react
+    userInput.value = "Hi there!";
+    // Use this syntax is we aren't sure if the element is null, but know what HTML Element type it should be
+    const userInput2 = document.getElementById('user-input');
+    if (userInput2) {
+        userInput2.value = "Type Guard Me";
+    }
 })(TypeGuards || (TypeGuards = {}));
 //# sourceMappingURL=app.js.map
