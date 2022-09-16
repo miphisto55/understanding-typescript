@@ -1,6 +1,10 @@
 "use strict";
 var TypeGuards;
 (function (TypeGuards) {
+    var _a;
+    function clog(...printData) {
+        console.log(printData);
+    }
     const ee1 = {
         name: 'Alex',
         privileges: ['programmer'],
@@ -14,6 +18,7 @@ var TypeGuards;
         startDate: new Date()
     };
     // Type guards
+    // This one implementation of add() takes care of all overloads
     function add(a, b) {
         // Type guard here when using union types
         if (typeof a === 'string' || typeof b === 'string') {
@@ -21,6 +26,21 @@ var TypeGuards;
         }
         return a + b;
     }
+    const result = add('Alex', 'Karah'); // now we can call .split() on result because we overloaded the function and it knows if 2 strings go in, a string comes out
+    const result2 = add('Bob', 'Dylan'); // can also do this
+    result.split(' ');
+    result2.split(' ');
+    // Lets pretend we're fetching user data from some backend or database
+    // What if the job field was empty?
+    const fetchedUserData = {
+        id: 'user1',
+        name: 'Alex',
+        job: { title: 'CEO', description: 'My own company' }
+    };
+    // Well we can check first if job is null before trying to access job.title
+    clog(fetchedUserData.job && fetchedUserData.job.title);
+    // Or use optional chaining operator
+    clog((_a = fetchedUserData === null || fetchedUserData === void 0 ? void 0 : fetchedUserData.job) === null || _a === void 0 ? void 0 : _a.title);
     function printEmployeeInformation(emp) {
         console.log("Type of employee: " + emp);
         console.log("Name: " + emp.name);
@@ -103,5 +123,15 @@ var TypeGuards;
     if (userInput2) {
         userInput2.value = "Type Guard Me";
     }
+    const errorBag = {
+        id: 'email-input-field',
+        username: 'Must start with a capital character!'
+    };
 })(TypeGuards || (TypeGuards = {}));
+// Namespace exports being used
+const admin2 = {
+    name: 'nub',
+    privileges: ['ok']
+};
+console.log(admin2);
 //# sourceMappingURL=app.js.map
