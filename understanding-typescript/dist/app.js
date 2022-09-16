@@ -1,30 +1,74 @@
 "use strict";
-// This is like interfacing with functions, you can contract functions to use the same parameters
-// type AddFn = (a: number, b: number) => number;
-let myAddFn;
-myAddFn = (n1, n2) => {
-    return n1 + n2;
-};
-;
-let user1;
-user1 = {
-    name: 'Alex',
-    greet(phrase) {
-        console.log(phrase + ' ' + this.name);
+var TypeGuards;
+(function (TypeGuards) {
+    const ee1 = {
+        name: 'Alex',
+        privileges: ['programmer'],
+        startDate: new Date()
+    };
+    ;
+    ;
+    const ee2 = {
+        name: 'Alex',
+        privileges: ['programmer'],
+        startDate: new Date()
+    };
+    // Type guards
+    function add(a, b) {
+        // Type guard here when using union types
+        if (typeof a === 'string' || typeof b === 'string') {
+            return a.toString() + b.toString();
+        }
+        return a + b;
     }
-};
-user1.greet('Hello there, I am');
-class Orc {
-    constructor(name, age) {
-        this.name = name;
-        this.age = age;
+    function printEmployeeInformation(emp) {
+        console.log("Type of employee: " + emp);
+        console.log("Name: " + emp.name);
+        // We can't use typeof here since its not a basic javascript type,
+        // but we can use the property name + in to check if it's there
+        if ('privileges' in emp) {
+            console.log("Privileges: " + emp.privileges);
+        }
+        if ('startDate' in emp) {
+            console.log("Start Date: " + emp.startDate);
+        }
     }
-    greet(phrase) {
-        console.log(this.name + ' - I am ' + this.age + " years old, " + phrase);
+    printEmployeeInformation(ee1);
+    // And with the more basic types
+    const a1 = {
+        name: 'Karah',
+        privileges: ['Lots of money', 'cutie pie']
+    };
+    const e1 = {
+        name: 'Bob',
+        startDate: new Date()
+    };
+    printEmployeeInformation(a1);
+    printEmployeeInformation(e1);
+    class Car {
+        drive() {
+            console.log("Driving...");
+        }
     }
-}
-;
-const orc1 = new Orc('Moktar', 121);
-orc1.greet('I WILL EAT YOUR BONES!');
-console.log(orc1);
+    class Truck {
+        drive() {
+            console.log("Driving a truck...");
+        }
+        loadCargo() {
+            console.log("Loading cargo...");
+        }
+    }
+    const v1 = new Car();
+    const v2 = new Truck();
+    function useVehicle(vehicle) {
+        vehicle.drive();
+        // Again can use the in keyword to check for properties... or
+        // use instanceof
+        if (vehicle instanceof Truck) {
+            vehicle.loadCargo();
+        }
+    }
+    useVehicle(v1);
+    useVehicle(v2);
+})(TypeGuards || (TypeGuards = {}));
 //# sourceMappingURL=app.js.map
