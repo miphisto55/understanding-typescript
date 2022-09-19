@@ -47,7 +47,8 @@ namespace Generics {
     console.log(countAndDescribe([]));
     // console.log(countAndDescribe(1));    // will not work because of course numbers do not have a "length" property
 
-    function extractAndConvert<T extends object, U extends keyof T>(obj: T, key: U) {
+    function extractAndConvert<T extends object, U extends keyof T>
+    (obj: T, key: U) {
         return 'Value: ' +  obj[key];
     }
 
@@ -62,7 +63,7 @@ namespace Generics {
 
     }
 
-    const gogo = new MyKeyedObject('Alex', 32);
-    const extracedAge = extractAndConvert(gogo, 'age');
+    const objWithKey = new MyKeyedObject('Alex', 32);
+    const extracedAge = extractAndConvert(objWithKey, 'age');
     console.log(extracedAge);
 }
