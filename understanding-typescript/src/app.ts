@@ -105,4 +105,40 @@ namespace Generics {
     // objStorage.addItem({name: "Karah"});
     // objStorage.removeItem({name: "Alex"});  // This will not work since the object here is a separate memory address from when we added name: 'Alex' above
     // console.log(objStorage.getItems());     // It will instead just remove "Karah" since that object happens to be the last thing in the array (index not found returns -1)
+
+    interface CourseGoal {
+        title: string;
+        desc: string;
+        completeUntil: Date;
+    }
+
+    function createCourseGoal(title: string, desc: string, date: Date): CourseGoal {
+        // The partial keyword allows you to make objects with OPTIONAL fields/properties
+        // Useful if we want to do some validation in here or something else with the data before
+        // setting this fields one by one.
+
+        // Otherwise we could just make a new courseGoal object and simply assign each property the correct value
+        // between the object curly braces
+        let courseGoal: Partial<CourseGoal> = {};
+        courseGoal.title = title;
+        courseGoal.desc = desc;
+        courseGoal.completeUntil = date;
+
+        return courseGoal as CourseGoal;    // And now we want to cast the object from Partial<CourseGoal> to CourseGoal
+    }
+
+    function createCourseGoal2(title: string, desc: string, date: Date): CourseGoal {
+        // Other way that is easier and more common of course
+        let courseGoal: CourseGoal = {
+            title: title,
+            desc: desc,
+            completeUntil: date
+        };
+        return courseGoal;    // And now we want to cast the object from Partial<CourseGoal> to CourseGoal
+    }
+
+    // array is readonly, cannot modify it in any way, push or pop etc..
+    const namez: Readonly<string[]> = ['Alex', 'Karah'];
+    // namez.push("Bob")
+    
 }
