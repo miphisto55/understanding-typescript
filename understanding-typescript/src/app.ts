@@ -66,4 +66,43 @@ namespace Generics {
     const objWithKey = new MyKeyedObject('Alex', 32);
     const extracedAge = extractAndConvert(objWithKey, 'age');
     console.log(extracedAge);
+
+    class DataStorage<T> {
+        private data: T[] = [];
+
+        addItem(item: T) {
+            this.data.push(item);
+        }
+
+        removeItem(item: T) {
+            const indexNotFoundFromSplice: number = -1;
+
+            if (this.data.indexOf(item) === indexNotFoundFromSplice) {
+                this.data.splice(this.data.indexOf(item), 1);
+            }
+        }
+
+        getItems() {
+            return [...this.data];
+        }
+    }
+
+    const textStorage = new DataStorage<string>();
+    textStorage.addItem("Alex");
+    textStorage.addItem("Karah");
+    textStorage.removeItem("Alex");
+    console.log(textStorage.getItems());
+    
+    const numberStorage = new DataStorage<number>();
+    numberStorage.addItem(5);
+    numberStorage.addItem(3);
+    numberStorage.removeItem(5);
+    console.log(numberStorage.getItems());
+
+    // Would need a more complicated or specific logic to handle objects properly.
+    // const objStorage = new DataStorage<object>();
+    // objStorage.addItem({name: "Alex"});
+    // objStorage.addItem({name: "Karah"});
+    // objStorage.removeItem({name: "Alex"});  // This will not work since the object here is a separate memory address from when we added name: 'Alex' above
+    // console.log(objStorage.getItems());     // It will instead just remove "Karah" since that object happens to be the last thing in the array (index not found returns -1)
 }

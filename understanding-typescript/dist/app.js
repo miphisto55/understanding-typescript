@@ -45,8 +45,27 @@ var Generics;
             this.age = age;
         }
     }
-    const gogo = new MyKeyedObject('Alex', 32);
-    const extracedAge = extractAndConvert(gogo, 'age');
+    const objWithKey = new MyKeyedObject('Alex', 32);
+    const extracedAge = extractAndConvert(objWithKey, 'age');
     console.log(extracedAge);
+    class DataStorage {
+        constructor() {
+            this.data = [];
+        }
+        addItem(item) {
+            this.data.push(item);
+        }
+        removeItem(item) {
+            this.data.splice(this.data.indexOf(item), 1);
+        }
+        getItems() {
+            return [...this.data];
+        }
+    }
+    const textStorage = new DataStorage();
+    textStorage.addItem("Alex");
+    textStorage.addItem("Karah");
+    textStorage.removeItem("Alex");
+    console.log(textStorage.getItems());
 })(Generics || (Generics = {}));
 //# sourceMappingURL=app.js.map
