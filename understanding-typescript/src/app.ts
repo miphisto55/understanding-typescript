@@ -175,6 +175,83 @@ namespace Decorators {
     // Add .bind(printer) to bind the 'this' keyword to specifically the printer object.
 
     // button.addEventListener('click', printer.showMessage.bind(printer));
-    // This works below because of the decorator PropertyDescriptor adjustment
-    button.addEventListener('click', printer.showMessage);
+    button.addEventListener('click', printer.showMessage);  // This works below because of the decorator PropertyDescriptor adjustment
+
+    // Using decorators for validation
+    interface ValidatorConfig {
+        [property: string]: {
+            [validatableProperty: string]: string[]     // ['required', 'positive']
+        }
+    }
+
+    const registeredValidators: ValidatorConfig = {};
+
+    // @Decorator
+    function Required(target: any, propName: string) {
+        registeredValidators[target.constructor.name] = {
+            ...registeredValidators[target.constructor.name],
+            [propName]: ['required']
+        };   // This stores the Course's Constructor's Name (a.k.a Course) as a key in the requiredValidators inteface object.
+    }
+
+    // @Decorator
+    function PositiveNumber(target: any, propName: string) {
+        registeredValidators[target.constructor.name] = {
+            ...registeredValidators[target.constructor.name],
+            [propName]: ['positive']
+        }; 
+    }
+
+    function validate(obj: any): boolean {
+       const objValidatorConfig = registeredValidators[obj.constructor.name];
+        if (!objValidatorConfig) {
+            return true;
+        }
+
+        let isValid = true;
+
+        for (const prop in objValidatorConfig) {
+            for (const validator of objValidatorConfig[prop]) {
+                switch(validator) {
+                    case 'required':
+                        isValid = isValid && !!obj[prop];       // obj[prop] will return a "truthy" or "falsey" value, use double !! to convert it to a real boolean
+                    case 'positive':
+                        isValid = isValid && obj[prop] > 0;
+                }
+            }
+        }
+        return isValid;
+    }
+
+    class Course {
+        @Required
+        title: string;
+        @PositiveNumber
+        price: number;
+
+        constructor(title: string, price: number) {
+            this.title = title;
+            this.price = price;
+        }
+    }
+
+    const courseForm = document.querySelector('form')!;
+
+    courseForm.addEventListener('submit', event => {
+        event.preventDefault();
+        const titleElement = document.getElementById('title') as HTMLInputElement;
+        const priceElement = document.getElementById('price') as HTMLInputElement;
+
+        const title = titleElement.value;
+        const price = +priceElement.value;      // Again, the '+' infront of the variable name casts it to a number
+
+        const createdCourse = new Course(title, price);
+
+        if (validate(createdCourse)) {
+            console.log(createdCourse);
+            return;
+        }
+        alert("Invalid Input.");
+        return;
+    });
 }
