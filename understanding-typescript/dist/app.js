@@ -1,71 +1,49 @@
 "use strict";
-var Generics;
-(function (Generics) {
-    // These are all the same thing
-    // const names1 = ['Alex', 'Karah'];
-    // const names2: Array<string> = ['Alex', 'Karah'];
-    // const names3: string[] = ['Alex', 'Karah'];
-    // // Working with generic types - we can tell the Promise that we specifically are expecting a string return
-    // const promise: Promise<string> = new Promise( (resolve, reject) => {
-    //     setTimeout( () => {
-    //         resolve('This is done!');
-    //     }, 2000)
-    // });
-    // promise.then(data => {
-    //     data.split(' ');
-    // })
-    function merge(objA, objB) {
-        return Object.assign(objA, objB);
-    }
-    console.log(merge({ name: 'Alex' }, { age: 69 }));
-    const mergedObj = merge({ name: 'Alex', hobbies: ['Programming', 'Sports'] }, { age: 69 }); // Hover over mergedObj to see how that intersection worked.
-    console.log(mergedObj);
-    function countAndDescribe(element) {
-        let descText = 'I have no value.';
-        if (element.length === 1) {
-            descText = 'I have 1 element.';
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+// best practice is name decorators with an uppercase starting character, like a class
+// Decorators execute when your classes are DEFINED, not when they are initialized/instantiated.
+// Regular decorator
+function Logger2(constructor) {
+    console.log('Logging...');
+    console.log(constructor);
+}
+// Decorator factory
+function Logger(logString) {
+    return function (constructor) {
+        console.log(logString);
+        console.log(constructor);
+    };
+}
+// Decorator factor #2
+function WithTemplate(template, hookId) {
+    // We use just an underscore '_' as the parameter name here to tell Typescript 'We know we need an argument, but we aren't going to use it'
+    return function (constructor) {
+        const hookElement = document.getElementById(hookId);
+        const person = new constructor();
+        if (hookElement) {
+            hookElement.innerHTML = template;
+            hookElement.querySelector('h1').textContent = person.name;
         }
-        else if (element.length > 1) {
-            descText = 'I have ' + element.length + ' elements.';
-        }
-        return [element, descText];
-    }
-    console.log(countAndDescribe('Hi there!'));
-    console.log(countAndDescribe(['One', 'Two']));
-    console.log(countAndDescribe([]));
-    // console.log(countAndDescribe(1));    // will not work because of course numbers do not have a "length" property
-    function extractAndConvert(obj, key) {
-        return 'Value: ' + obj[key];
-    }
-    class MyKeyedObject {
-        constructor(name, age) {
-            this.name = 'default';
-            this.age = 0;
-            this.name = name;
-            this.age = age;
-        }
-    }
-    const objWithKey = new MyKeyedObject('Alex', 32);
-    const extracedAge = extractAndConvert(objWithKey, 'age');
-    console.log(extracedAge);
-    class DataStorage {
+    };
+}
+var Temporary;
+(function (Temporary) {
+    let Person = class Person {
         constructor() {
-            this.data = [];
+            this.name = 'Alex';
+            console.log('Creating person object...');
         }
-        addItem(item) {
-            this.data.push(item);
-        }
-        removeItem(item) {
-            this.data.splice(this.data.indexOf(item), 1);
-        }
-        getItems() {
-            return [...this.data];
-        }
-    }
-    const textStorage = new DataStorage();
-    textStorage.addItem("Alex");
-    textStorage.addItem("Karah");
-    textStorage.removeItem("Alex");
-    console.log(textStorage.getItems());
-})(Generics || (Generics = {}));
+    };
+    Person = __decorate([
+        Logger('LOGGING - PERSON'),
+        WithTemplate('<h1>Person Template</h1>', 'app')
+    ], Person);
+    const pers = new Person();
+    console.log(pers);
+})(Temporary || (Temporary = {}));
 //# sourceMappingURL=app.js.map
