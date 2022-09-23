@@ -1,6 +1,12 @@
 "use strict";
 //---------------------------------------------------------------------------------------------------------------------------------------
 // Decorators
+//
+// Description: Decorators should be defined at the top of a file.
+//              Decorators are usually useful for setting up other things, not event listeners
+//              Best practice is name decorators with an uppercase starting character, like a class
+//              Decorators execute when your classes/parameters/fields are DEFINED, not when they are initialized/instantiated.
+//              Decorators can be used above a lot of places, including classes, interfaces, properties/fields, parameters etc...
 //---------------------------------------------------------------------------------------------------------------------------------------
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
@@ -11,10 +17,6 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
-// Decorators should be defined at the top of a file.
-// Best practice is name decorators with an uppercase starting character, like a class
-// Decorators execute when your classes are DEFINED, not when they are initialized/instantiated.
-// Decorators can be used above a lot of places, including classes, interfaces, properties/fields etc...
 // Regular decorator
 function Logger2(constructor) {
     console.log('Logging...');
@@ -29,18 +31,28 @@ function Logger(logString) {
     };
 }
 // Decorator factory #2
+// This implementation allows us to basically REPLACE the class it decorates to return another class inside of it that extends
+// the original class, but with modifications to it whenever it is instantiated.
 function WithTemplate(template, hookId) {
+    console.log('TEMPLATE FACTORY');
     // We use just an underscore '_' as the parameter name here to tell Typescript 'We know we need an argument, but we aren't going to use it'
-    return function (constructor) {
-        console.log('TEMPLATE FACTORY');
-        const hookElement = document.getElementById(hookId);
-        const person = new constructor();
-        // if the hookElement exists/isn't null
-        if (hookElement) {
-            console.log('Rendering template...');
-            hookElement.innerHTML = template; // Set the html in the DOM to our template string
-            hookElement.querySelector('h1').textContent = person.name; // Query select an h1 element, and set the text to person obj.name
-        }
+    // <T extends { new(...args: any[]): {} }> explaination:
+    // This function takes a generic object T, that extends the new() keyword functionality that accepts any amount of args '...args: any[]', and it returns an object with a name property
+    return function (originalConstructor) {
+        // returning a NEW class, but it returns the constructor function that extends the original class constructor passed in
+        // Now we really CAN run this code AFTER we instantiate a new class
+        return class extends originalConstructor {
+            constructor(...args) {
+                super();
+                console.log('Rendering template...');
+                const hookElement = document.getElementById(hookId);
+                // if the hookElement exists/isn't null
+                if (hookElement) {
+                    hookElement.innerHTML = template; // Set the html in the DOM to our template string
+                    hookElement.querySelector('h1').textContent = this.name; // Query select an h1 element, and set the text to person obj.name
+                }
+            }
+        };
     };
 }
 //---------------------------------------------------------------------------------------------------------------------------------------
@@ -66,10 +78,7 @@ var Decorators;
     ], Person);
     const pers = new Person();
     console.log(pers);
-    //-----------------------------------------------------------------------------------------------------------------------------------
-    // Class: Product
-    //-----------------------------------------------------------------------------------------------------------------------------------
-    // Decorator
+    // Decorators
     function Log(target, propertyName) {
         console.log('Property Decorator!');
         console.log(target, propertyName);
@@ -101,6 +110,9 @@ var Decorators;
         console.log('position');
         console.log(position);
     }
+    //-----------------------------------------------------------------------------------------------------------------------------------
+    // Class: Product
+    //-----------------------------------------------------------------------------------------------------------------------------------
     class Product {
         constructor(t, price) {
             this.title = t;
@@ -128,5 +140,39 @@ var Decorators;
         Log3,
         __param(0, Log4)
     ], Product.prototype, "getPriceWithTax", null);
+    const product1 = new Product('Book', 19);
+    const product2 = new Product('Book2', 8);
+    // Decorator
+    function Autobind(_1, _2, descriptor) {
+        const originalMethod = descriptor.value;
+        const adjustedDescriptor = {
+            configurable: true,
+            enumerable: false,
+            // The 'this' keyword belongs to whatever is responsible for calling the get() method, which in this case is itself since we store the originalMethod.
+            get() {
+                const boundFunction = originalMethod.bind(this);
+                return boundFunction;
+            }
+        };
+        // Now return the old's methods Prop Descriptor with the adjusted method's Prop Descriptor (the property descriptor allows us to configure how methods behave)
+        return adjustedDescriptor;
+    }
+    class Printer {
+        constructor() {
+            this.message = 'This works!';
+        }
+        showMessage() {
+            console.log(this.message);
+        }
+    }
+    __decorate([
+        Autobind
+    ], Printer.prototype, "showMessage", null);
+    const printer = new Printer();
+    const button = document.querySelector('button');
+    // printer.showMessage in this case without any modifcation will just return undefined because the 'this' keyword in the showMessage() function actually gets bound to the target
+    // of the eventListener, and not the actual Printer object in which the 'this' keyword was originally refering to.
+    // Add .bind(printer) to bind the 'this' keyword to specifically the printer object.
+    button.addEventListener('click', printer.showMessage);
 })(Decorators || (Decorators = {}));
 //# sourceMappingURL=app.js.map
