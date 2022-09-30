@@ -2,6 +2,46 @@
 
 namespace DragDropProject {
 
+    // Project State Management
+    // type MyType = () => {}
+    type Listener = (items: Project[]) => void;
+
+    class ProjectState {
+        private listeners: Listener[] = [];
+        private projects: Project[] = [];
+        private static instance: ProjectState;
+
+        private constructor() {
+        }
+
+        // Singleton pattern for the ProjectState
+        static getInstance(): ProjectState {
+            if (this.instance) {
+                return this.instance;
+            }
+            this.instance = new ProjectState();
+            return this.instance;
+        }
+
+        addProject(title: string, desc: string, numOfPeople: number) {
+            const newProject = new Project(title, desc, numOfPeople, ProjectStatus.ACTIVE);
+            this.projects.push(newProject);
+
+            for (const listenerFn of this.listeners) {
+                // projects.slice() only returns a COPY of that array, and not the original
+                listenerFn(this.projects.slice());
+            }
+        }
+
+        // This adds to the list of listener function references
+        addListener(listenerFn: Listener) {
+            this.listeners.push(listenerFn);
+        }
+    }
+
+    // Global Project State object is available everywhere in the application
+    const projectState = ProjectState.getInstance();
+
     // Validation
     interface Validatable {
         value: string | number;
@@ -12,6 +52,7 @@ namespace DragDropProject {
         max?: number;
     }
 
+    // Utility function
     function validate(input: Validatable) {
         let isValid = true;
 
@@ -51,15 +92,34 @@ namespace DragDropProject {
         FINISHED = 'finished'
     }
 
+    // Project class
+    class Project {
+        id: string;
+        title: string;
+        desc: string;
+        numOfPeople: number;
+        status: ProjectStatus;
+
+        constructor(title: string, desc: string, numOfPeople: number, status: ProjectStatus) {
+            this.id = Math.random().toString();
+            this.title = title;
+            this.desc = desc;
+            this.numOfPeople = numOfPeople;
+            this.status = status;
+        }
+    }
+
     // ProjectList class
     class ProjectList {
         templateElement: HTMLTemplateElement;
         hostElement: HTMLDivElement;
         sectionElement: HTMLElement;
+        assignedProjects: Project[];
 
         constructor(private type: ProjectStatus.ACTIVE | ProjectStatus.FINISHED) {
             this.templateElement = document.getElementById('project-list')! as HTMLTemplateElement;
             this.hostElement = document.getElementById('app')! as HTMLDivElement;
+            this.assignedProjects = [];
 
             const importNode = document.importNode(this.templateElement.content, true);
             this.sectionElement = importNode.firstElementChild as HTMLElement;
@@ -67,12 +127,42 @@ namespace DragDropProject {
             // The Id in this case should be dynamic because we want multiple ProjectLists
             this.sectionElement.id = `${this.type.valueOf()}-projects`;
 
+            // Subscribe to the Project State class's list of listeners
+            projectState.addListener((projects: Project[]) => {
+                // array.filter() returns only items that are true in the function body
+                const relevantProjects = projects.filter(project => {
+                    if (this.type === ProjectStatus.ACTIVE) {
+                        return project.status === ProjectStatus.ACTIVE;
+                    }
+                    else {
+                        return project.status === ProjectStatus.FINISHED;
+                    }
+                    
+                });
+                this.assignedProjects = relevantProjects;
+                this.renderProjects();
+            });
+
             this.attach();
             this.renderContent();
         }
 
+        private renderProjects() {
+            // Get the listElement from the DOM
+            const listElement = document.getElementById(`${this.type.valueOf()}-project-list`)! as HTMLUListElement;
+            // Clear the listElement if anything is already there because we loop through all assignedProjects and populate the listElement textContent with it
+            // Prevents duplicate projects from being rendered
+            listElement.innerHTML = '';
+
+            for (const projectItem of this.assignedProjects) {
+                const listItem = document.createElement('li');
+                listItem.textContent = projectItem.title;
+                listElement.appendChild(listItem);
+            }
+        }
+
         private renderContent() {
-            const listId = `${this.type.valueOf()}-project-list`
+            const listId = `${this.type.valueOf()}-project-list`;
 
             // Dynamically set the unordered list id as the listId
             this.sectionElement.querySelector('ul')!.id = listId;
@@ -160,6 +250,7 @@ namespace DragDropProject {
             if (Array.isArray(userInput)) {
                 const [title, desc, people] = userInput;    // Use destructuring to get 3 variables of title, desc, and people from userInput
                 console.log(title, desc, people.toString());
+                projectState.addProject(title, desc, people);
 
                 this.clearInputs();
             }
@@ -183,12 +274,17 @@ namespace DragDropProject {
         }
     }
 
+    // -----------------------------------------------------------------------------------------------------------------
+    // MAIN
+    // -----------------------------------------------------------------------------------------------------------------
+
     // Construct a new ProjectInput object that runs the constructor code.
     const projectInput = new ProjectInput();
     console.log(projectInput);
 
     const projectList1 = new ProjectList(ProjectStatus.ACTIVE);
     const projectList2 = new ProjectList(ProjectStatus.FINISHED);
+
     console.log(projectList1);
     console.log(projectList2);
 }
