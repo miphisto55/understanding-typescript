@@ -4,14 +4,23 @@ namespace DragDropProject {
 
     // Project State Management
     // type MyType = () => {}
-    type Listener = (items: Project[]) => void;
+    type Listener<T> = (items: T[]) => void;
 
-    class ProjectState {
-        private listeners: Listener[] = [];
+    class State<T> {
+        protected listeners: Listener<T>[] = [];
+
+        // This adds to the list of listener function references
+        addListener(listenerFn: Listener<T>) {
+            this.listeners.push(listenerFn);
+        }
+    }
+
+    class ProjectState extends State<Project> {
         private projects: Project[] = [];
         private static instance: ProjectState;
 
         private constructor() {
+            super();
         }
 
         // Singleton pattern for the ProjectState
@@ -26,17 +35,24 @@ namespace DragDropProject {
         addProject(title: string, desc: string, numOfPeople: number) {
             const newProject = new Project(title, desc, numOfPeople, ProjectStatus.ACTIVE);
             this.projects.push(newProject);
+            this.updateListeners();
+        }
 
+        moveProject(projectId: string, newStatus: ProjectStatus) {
+            const project = this.projects.find(prj => prj.id === projectId);
+            if (project) {
+                project.status === newStatus;
+                this.updateListeners();
+            }
+        }
+
+        updateListeners() {
             for (const listenerFn of this.listeners) {
                 // projects.slice() only returns a COPY of that array, and not the original
                 listenerFn(this.projects.slice());
             }
         }
 
-        // This adds to the list of listener function references
-        addListener(listenerFn: Listener) {
-            this.listeners.push(listenerFn);
-        }
     }
 
     // Global Project State object is available everywhere in the application
@@ -50,6 +66,18 @@ namespace DragDropProject {
         maxLength?: number;
         min?: number;
         max?: number;
+    }
+
+    // Drag & Drop Interfaces
+    interface Draggable {
+        dragStartHandler(event: DragEvent): void;
+        dragEndHandler(event: DragEvent): void;
+    }
+
+    interface DragTarget {
+        dragOverHandler(event: DragEvent): void;      // A way to signify that the element being dropped is targeting a valid drop target
+        dropHandler(event: DragEvent): void;          // React to the actual drop
+        dragLeaveHandler(event: DragEvent): void;     // A way to revert any visual update if the user decides NOT to drop the dragged element, or simply cancels
     }
 
     // Utility function
@@ -92,6 +120,34 @@ namespace DragDropProject {
         FINISHED = 'finished'
     }
 
+    // Component Base class
+    abstract class Component<T extends HTMLElement, U extends HTMLElement> {
+        templateElement: HTMLTemplateElement;
+        hostElement: T;     // The parent of the element we want to render
+        element: U;         // the element that actually gets rendered
+
+        constructor(templateId: string, hostElementId: string, insertAtStart: boolean, newElementId?: string) {
+            this.templateElement = document.getElementById(templateId)! as HTMLTemplateElement;
+            this.hostElement = document.getElementById(hostElementId)! as T;
+
+            const importNode = document.importNode(this.templateElement.content, true);
+            this.element = importNode.firstElementChild as U;
+
+            // The Id in this case should be dynamic because we want multiple ProjectLists
+            if (newElementId) {
+                this.element.id = newElementId;
+            }
+            this.attach(insertAtStart);
+        }
+
+        private attach(insertAtBeginning: boolean) {
+            this.hostElement.insertAdjacentElement(insertAtBeginning ? 'afterbegin' : 'beforeend', this.element);
+        }
+
+        abstract configure(): void;
+        abstract renderContent(): void;
+    }
+
     // Project class
     class Project {
         id: string;
@@ -109,23 +165,88 @@ namespace DragDropProject {
         }
     }
 
+    // ProjectItem class (responsible for rendering a single project item)
+    class ProjectItem extends Component <HTMLUListElement, HTMLLIElement> implements Draggable {
+        private project: Project;
+
+        get persons() {
+            if (this.project.numOfPeople === 1) {
+                return '1 person';
+            }
+            else {
+                return `${this.project.numOfPeople} persons`;
+            }
+        }
+
+        constructor(hostId: string, project: Project) {
+            super('single-project', hostId, false, project.id);
+            this.project = project;
+
+            this.configure();
+            this.renderContent();
+        }
+
+        @Autobind
+        dragStartHandler(event: DragEvent): void {
+            event.dataTransfer!.setData('text/plain', this.project.id);
+            event.dataTransfer!.effectAllowed = 'move';
+        }
+
+        dragEndHandler(_: DragEvent): void {
+            console.log('DragEnd');
+        }
+
+        configure() {
+            this.element.addEventListener('dragstart', this.dragStartHandler);
+            this.element.addEventListener('dragstart', this.dragEndHandler);
+        } 
+        
+        renderContent() {
+            this.element.querySelector('h2')!.textContent = this.project.title;
+            this.element.querySelector('h3')!.textContent = this.persons + ' assigned';
+            this.element.querySelector('p')!.textContent = this.project.desc;
+        }
+
+    }
+
     // ProjectList class
-    class ProjectList {
-        templateElement: HTMLTemplateElement;
-        hostElement: HTMLDivElement;
-        sectionElement: HTMLElement;
+    class ProjectList extends Component <HTMLDivElement, HTMLElement> implements DragTarget {
         assignedProjects: Project[];
 
         constructor(private type: ProjectStatus.ACTIVE | ProjectStatus.FINISHED) {
-            this.templateElement = document.getElementById('project-list')! as HTMLTemplateElement;
-            this.hostElement = document.getElementById('app')! as HTMLDivElement;
+            super('project-list', 'app', false, `${type}-projects`);      // The Id in this case should be dynamic because we want multiple ProjectLists
             this.assignedProjects = [];
 
-            const importNode = document.importNode(this.templateElement.content, true);
-            this.sectionElement = importNode.firstElementChild as HTMLElement;
+            this.configure();
+            this.renderContent();
+        }
 
-            // The Id in this case should be dynamic because we want multiple ProjectLists
-            this.sectionElement.id = `${this.type.valueOf()}-projects`;
+        @Autobind
+        dragOverHandler(event: DragEvent): void {
+            if (event.dataTransfer && event.dataTransfer.types[0] === 'text/plain') {
+                event.preventDefault();     // default in JS is to NOT allow things to be dragged and dropped.
+                const listElement = this.element.querySelector('ul')!;
+                listElement.classList.add('droppable');
+            }
+            
+        }
+
+        @Autobind
+        dropHandler(event: DragEvent): void {
+            const projectId = event.dataTransfer!.getData('text/plain');
+            projectState.moveProject(projectId, this.type === ProjectStatus.ACTIVE ? ProjectStatus.ACTIVE : ProjectStatus.FINISHED);
+        }
+
+        @Autobind
+        dragLeaveHandler(_: DragEvent): void {
+            const listElement = this.element.querySelector('ul')!;
+            listElement.classList.remove('droppable');
+        }
+
+        configure() {
+            this.element.addEventListener('dragover', this.dragOverHandler);
+            this.element.addEventListener('dragleave', this.dragLeaveHandler);
+            this.element.addEventListener('drop', this.dropHandler);
 
             // Subscribe to the Project State class's list of listeners
             projectState.addListener((projects: Project[]) => {
@@ -142,9 +263,14 @@ namespace DragDropProject {
                 this.assignedProjects = relevantProjects;
                 this.renderProjects();
             });
+        }
 
-            this.attach();
-            this.renderContent();
+        renderContent() {
+            const listId = `${this.type.valueOf()}-project-list`;
+
+            // Dynamically set the unordered list id as the listId
+            this.element.querySelector('ul')!.id = listId;
+            this.element.querySelector('h2')!.textContent = this.type.valueOf().toUpperCase() + ' PROJECTS';
         }
 
         private renderProjects() {
@@ -155,53 +281,40 @@ namespace DragDropProject {
             listElement.innerHTML = '';
 
             for (const projectItem of this.assignedProjects) {
-                const listItem = document.createElement('li');
-                listItem.textContent = projectItem.title;
-                listElement.appendChild(listItem);
+                // const listItem = document.createElement('li');
+                // listItem.textContent = projectItem.title;
+                // listElement.appendChild(listItem);
+                new ProjectItem(this.element.querySelector('ul')!.id, projectItem);
             }
         }
 
-        private renderContent() {
-            const listId = `${this.type.valueOf()}-project-list`;
-
-            // Dynamically set the unordered list id as the listId
-            this.sectionElement.querySelector('ul')!.id = listId;
-            this.sectionElement.querySelector('h2')!.textContent = this.type.valueOf().toUpperCase() + ' PROJECTS';
-        }
-
-        private attach() {
-            this.hostElement.insertAdjacentElement('beforeend', this.sectionElement);
-        }
     }
 
     // ProjectInput class
-    class ProjectInput {
-        // Form Related HTML Elements in index.html
-        templateElement: HTMLTemplateElement;
-        hostElement: HTMLDivElement;
-        formElement: HTMLFormElement;
-
+    class ProjectInput extends Component <HTMLDivElement, HTMLFormElement> {
         // HTML Elements to store user input
         titleInputElement: HTMLInputElement;
         descInputElement: HTMLInputElement;
         peopleInputElement: HTMLInputElement;
 
         constructor() {
-            // Get the HTML Form elements
-            this.templateElement = document.getElementById('project-input')! as HTMLTemplateElement;
-            this.hostElement = document.getElementById('app')! as HTMLDivElement;
-
-            const importNode = document.importNode(this.templateElement.content, true);
-            this.formElement = importNode.firstElementChild as HTMLFormElement;
-            this.formElement.id = 'user-input';
-
+            super('project-input', 'app', true, 'user-input');
             // Grab user Input from the forms in index.html
-            this.titleInputElement = this.formElement.querySelector('#title') as HTMLInputElement;  // Lead with # to select an id property on an HTML element
-            this.descInputElement = this.formElement.querySelector('#description') as HTMLInputElement;
-            this.peopleInputElement = this.formElement.querySelector('#people') as HTMLInputElement;
+            this.titleInputElement = this.element.querySelector('#title') as HTMLInputElement;  // Lead with # to select an id property on an HTML element
+            this.descInputElement = this.element.querySelector('#description') as HTMLInputElement;
+            this.peopleInputElement = this.element.querySelector('#people') as HTMLInputElement;
 
             this.configure();
-            this.attach();
+        }
+
+        // Add event listener to the FormElement so we know when a user submits data.
+        configure() {
+            // Must bind 'this' class to the event listenener so that the target of the listener isn't inheriting 'this'
+            this.element.addEventListener('submit', this.submitHandler);
+        }
+
+        renderContent(): void {
+            
         }
 
         private gatherUserInput(): [string, string, number] | void {
@@ -256,22 +369,12 @@ namespace DragDropProject {
             }
         }
 
-        // Add event listener to the FormElement so we know when a user submits data.
-        private configure() {
-            // Must bind 'this' class to the event listenener so that the target of the listener isn't inheriting 'this'
-            this.formElement.addEventListener('submit', this.submitHandler);
-        }
-
         private clearInputs() {
             this.titleInputElement.value = '';
             this.descInputElement.value = '';
             this.peopleInputElement.value = '';
         }
 
-        // Insertion of manipulated data
-        private attach() {
-            this.hostElement.insertAdjacentElement('afterbegin', this.formElement);
-        }
     }
 
     // -----------------------------------------------------------------------------------------------------------------
