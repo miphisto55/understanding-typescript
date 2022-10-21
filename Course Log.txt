@@ -1,0 +1,14 @@
+Course Log:
+
+    Friday Oct 21, 2022:
+    Module 12 focused on working with 'webpack', a 3rd party tool that optimizes/compresses and 'minifies' our compiled JS code into a single file with everything in it. This is advantageous to do because normally when we import files/code from other directories into other files, the web browser has to make HTTP requests to access and transfer that data around, greatly reducing the speed and responsiveness of the website.
+    There are many settings, configurations, and setup involved in doing so, and requires the NodeJS LTS version as the newer versions do not support certain features as of yet.
+
+    Pros:
+        - Bundles all of our different files into 1 file
+        - Decreases the number of HTTP requests being made greatly increasing performance
+        - Is highly configurable to help with development, and streamline produciton builds
+        - Is compatible with different typescript loaders as well as vanilla JS
+        - A must use in any modern TS/JS project and is the industry standard
+
+        
