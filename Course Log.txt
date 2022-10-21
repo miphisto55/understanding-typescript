@@ -1,14 +1,26 @@
 Course Log:
 
-    Friday Oct 21, 2022:
-    Module 12 focused on working with 'webpack', a 3rd party tool that optimizes/compresses and 'minifies' our compiled JS code into a single file with everything in it. This is advantageous to do because normally when we import files/code from other directories into other files, the web browser has to make HTTP requests to access and transfer that data around, greatly reducing the speed and responsiveness of the website.
-    There are many settings, configurations, and setup involved in doing so, and requires the NodeJS LTS version as the newer versions do not support certain features as of yet.
+    // -----------------------------
+    Friday Oct 28, 2022:
 
+    Module 13:
+    
+
+    // -----------------------------
+    Friday Oct 21, 2022:
+    
+    Module 12: 
+    Focused on working with 'webpack', a 3rd party tool that optimizes/compresses and 'minifies' our compiled JS code into a single file with everything in it. This is advantageous to do because normally when we import files/code from other directories into other files, the web browser has to make HTTP requests to access and transfer that data around, greatly reducing the speed and responsiveness of the website.
+    There are many settings, configurations, and setup involved in doing so, and requires the NodeJS LTS version as the newer versions do not support certain features as of yet.
     Pros:
         - Bundles all of our different files into 1 file
         - Decreases the number of HTTP requests being made greatly increasing performance
         - Is highly configurable to help with development, and streamline produciton builds
         - Is compatible with different typescript loaders as well as vanilla JS
         - A must use in any modern TS/JS project and is the industry standard
+
+    Module 13:
+    Focuses on important/common 3rd party libraries that speed up development, including typescript-specific libraries. Lodash is a common 3rd party library that contains a lot of useful functions to aid in development. We imported this JS library as an example to show how JS libraries interface with TS.
+    Because TS is a superset of JS, any JS libraries will de-facto work with typescript. However, when developing with these libraries, the IDE will throw many errors as there are no types or proper definitions for any of these libraries. What we can do is use npm to install '@types/libraryNameHere' to bring in schemas that properly translate and define schemas for these libraries so IDE intellisense works. Just as important, it also prevents our browser from throwing a mountain of errors into our console when trying to debug, as well as successfully allow TS -> JS compilation.
 
         
